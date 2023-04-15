@@ -1,5 +1,5 @@
 {
-  "name": "Auto Tiling Window Manager",
+  "name": "Auto Tiling",
   "description": "Automatically manage your windows like a tiling window manager, or the Pop Shell, plugin does",
   "uuid": "autotilingwm@alexispurslane.github.com",
   "shell-version": [

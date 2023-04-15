@@ -45,13 +45,6 @@ const AutoTilingToggle = GObject.registerClass(
                 toggleMode: true
             });
 
-            // Get the GSchema source
-            let gschema = Gio.SettingsSchemaSource.new_from_directory(
-                Me.dir.get_child('schemas').get_path(),
-                Gio.SettingsSchemaSource.get_default(),
-                false
-            );
-
             this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.autotilingwm');
 
             this._settings.bind(
@@ -62,18 +55,9 @@ const AutoTilingToggle = GObject.registerClass(
             );
 
             log('binding icon');
-            this._settings.bind_property_full(
-                'tiling-on',
-                this,
-                'gicon',
-                GObject.BindingFlags.DEFAULT,
-                (bind, source) => {
-                    log('changing icon');
-                    log(source);
-                    [true, source ? ICON_AUTO_ON : ICON_AUTO_OFF]
-                },
-                null
-            );
+            this.connect('notify::checked', (_) => {
+                this.gicon = this.checked ? ICON_AUTO_ON : ICON_AUTO_OFF;
+            });
         }
     });
 

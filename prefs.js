@@ -29,7 +29,7 @@ function fillPreferencesWindow(window) {
   // Create a new preferences row
   const row = new Adw.ActionRow({
     title: 'Enable Auto Window Tiling',
-    subtitle: 'When enabled, the extension will manage tiling your windows on the screen.'
+    subtitle: 'When enabled, this extension will manage tiling your windows on the screen.'
   });
   group.add(row);
 
@@ -56,12 +56,9 @@ function fillPreferencesWindow(window) {
   group2.add(row2);
 
   // Create the sliders for gaps
-  const innerGaps = new Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, new Gtk.Adjustment({
-    'lower': 0,
-    'upper': 100,
-    'step-increment': 1,
-    'value': settings.get_int('inner-gaps')
-  }));
+  const innerGaps = Gtk.SpinButton.new_with_range(0, 30, 1);
+  innerGaps.set_margin_top(10);
+  innerGaps.set_margin_bottom(10);
   settings.bind(
     'inner-gaps',
     innerGaps,
@@ -77,12 +74,9 @@ function fillPreferencesWindow(window) {
   });
   group2.add(row3);
 
-  const outerGaps = new Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, new Gtk.Adjustment({
-    'lower': 0,
-    'upper': 100,
-    'step-increment': 1,
-    'value': settings.get_int('outer-gaps')
-  }));
+  const outerGaps = Gtk.SpinButton.new_with_range(0, 30, 1);
+  outerGaps.set_margin_top(10);
+  outerGaps.set_margin_bottom(10);
   settings.bind(
     'outer-gaps',
     outerGaps,
