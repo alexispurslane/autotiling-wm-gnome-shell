@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.autotilingwm"
+  path="/org/gnome/shell/extensions/autotilingwm/">
+    <key name="tiling-on" type="b">
+      <default>true</default>
+    </key>
+    <key name="outer-gaps" type="n">
+      <default>0</default>
+    </key>
+    <key name="inner-gaps" type="n">
+      <default>0</default>
+    </key>
+  </schema>
+</schemalist>

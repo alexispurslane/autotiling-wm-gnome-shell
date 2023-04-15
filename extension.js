@@ -20,27 +20,60 @@
 
 const GETTEXT_DOMAIN = 'my-indicator-extension';
 
-const { GObject, St } = imports.gi;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+
+const { GObject, Gio, St } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Main = imports.ui.main;
+const QuickSettings = imports.ui.quickSettings;
+const QuickSettingsMenu = imports.ui.main.panel.statusArea.quickSettings;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const _ = ExtensionUtils.gettext;
 
-const Indicator = GObject.registerClass(
-    class Indicator extends PanelMenu.Button {
+const ICON_AUTO_ON = Gio.icon_new_for_string(`${Me.path}/icons/auto-on-symbolic.svg`);
+const ICON_AUTO_OFF = Gio.icon_new_for_string(`${Me.path}/icons/auto-off-symbolic.svg`);
+
+const AutoTilingToggle = GObject.registerClass(
+    class AutoTilingToggle extends QuickSettings.QuickToggle {
         _init() {
-            super._init(0.0, _('Auto Tiling Window Manager'));
+            super._init({
+                title: 'Auto Tiling',
+                gicon: ICON_AUTO_ON,
+                toggleMode: true
+            });
 
-            this.icon_auto_on = Gio.icon_new_for_string(`${Me.path}/icons/auto-on-symbolic.svg`);
-            this.icon_auto_off = Gio.icon_new_for_string(`${Me.path}/icons/auto-off-symbolic.svg`);
+            // Get the GSchema source
+            let gschema = Gio.SettingsSchemaSource.new_from_directory(
+                Me.dir.get_child('schemas').get_path(),
+                Gio.SettingsSchemaSource.get_default(),
+                false
+            );
 
-            this.add_actor(new St.Icon({
-                gicon: this.icon_auto_on,
-                style_class: 'system-status-icon'
-            }));
+            this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.autotilingwm');
+
+            this._settings.bind(
+                'tiling-on',
+                this,
+                'checked',
+                Gio.SettingsBindFlags.DEFAULT
+            );
+
+            log('binding icon');
+            this._settings.bind_property_full(
+                'tiling-on',
+                this,
+                'gicon',
+                GObject.BindingFlags.DEFAULT,
+                (bind, source) => {
+                    log('changing icon');
+                    log(source);
+                    [true, source ? ICON_AUTO_ON : ICON_AUTO_OFF]
+                },
+                null
+            );
         }
     });
 
@@ -52,13 +85,19 @@ class Extension {
     }
 
     enable() {
-        this._indicator = new Indicator();
-        Main.panel.addToStatusArea(this._uuid, this._indicator);
+        log("enabling");
+        log("adding toggle to quick settings menu");
+        this._quickSettingToggle = new AutoTilingToggle();
+        QuickSettingsMenu._addItems([this._quickSettingToggle]);
+        QuickSettingsMenu.menu._grid.set_child_below_sibling(
+            this._quickSettingToggle,
+            QuickSettingsMenu._backgroundApps.quickSettingsItems[0]
+        );
+        log("toggle added");
     }
 
     disable() {
-        this._indicator.destroy();
-        this._indicator = null;
+        this._quickSettingToggle.get_parent().remove_child(this._quickSettingToggle);
     }
 }
 
